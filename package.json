@@ -1,14 +1,1 @@
-{
-  "name": "lora-tag-inspector",
-  "version": "1.5.0",
-  "description": "Lora Tag Inspector — 提示词标签检查与批量管理工具",
-  "main": "index.html",
-  "window": {
-    "title": "Lora Tag Inspector v1.5",
-    "width": 1280,
-    "height": 800,
-    "min_width": 900,
-    "min_height": 600
-  },
-  "chromium-args": "--disable-extensions"
-}
+{"name":"lora-tag-inspector","main":"index.html","window":{"title":"Lora Tag Inspector v1.5","width":1280,"height":800,"min_width":900,"min_height":600}}

@@ -7,6 +7,25 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Error display (visible only when JS errors occur) -->
+  <div id="err-bar" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff4444;color:#fff;padding:12px 16px;z-index:99999;font-family:Consolas,monospace;font-size:13px;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;" onclick="this.style.display='none'" title="点击关闭"></div>
+  <script>
+    (function(){
+      var bar = document.getElementById('err-bar');
+      function show(msg, type) {
+        bar.style.display = 'block';
+        bar.innerHTML = '<strong>' + (type||'Error') + ':</strong> ' + msg + ' <small style="opacity:0.7">(点击关闭)</small>';
+      }
+      window.addEventListener('error', function(e) {
+        if (e.filename && (e.filename.includes('esm.sh')||e.filename.includes('cdn'))) return;
+        show(e.message + '<br><small>' + e.filename + ':' + e.lineno + '</small>', '页面错误');
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        show((e.reason && (e.reason.message || e.reason)) || '未知的 Promise 错误', '异步错误');
+      });
+    })();
+  </script>
+
   <div id="banner-readonly">⚠ 浏览器不支持文件系统写入，修改后将下载保存</div>
   <div id="app">
     <!-- Left Sidebar -->
