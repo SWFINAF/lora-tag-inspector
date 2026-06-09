@@ -1,0 +1,23 @@
+# NW.js runtime (large binaries, downloaded separately)
+nwjs-runtime/
+nwjs-temp.zip
+dist/
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Claude/Superpowers internal files
+.superpowers/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Node (if any)
+node_modules/

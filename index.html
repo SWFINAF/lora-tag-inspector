@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lora Tag Inspector</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="banner-readonly">⚠ 浏览器不支持文件系统写入，修改后将下载保存</div>
+  <div id="app">
+    <!-- Left Sidebar -->
+    <aside id="sidebar">
+      <div id="drop-zone">
+        <div class="drop-icon">📁</div>
+        <p>拖拽文件夹/文件到此处</p>
+        <p class="drop-hint">或</p>
+        <button id="btn-select-folder">选择文件夹</button>
+        <button id="btn-select-files">选择文件</button>
+        <input type="file" id="file-input-hidden" webkitdirectory hidden>
+        <input type="file" id="files-input-hidden" multiple hidden>
+      </div>
+      <div id="file-list-container" style="display:none;">
+        <div id="file-list-header">
+          <input type="checkbox" id="chk-select-all" title="全选/取消全选">
+          <h3>文件列表 <span id="file-count"></span></h3>
+          <button id="btn-close-folder" title="关闭文件夹并清空文件列表">✕ 关闭</button>
+        </div>
+        <ul id="file-list"></ul>
+      </div>
+    </aside>
+
+    <!-- Sidebar resize divider -->
+    <div id="sidebar-divider"></div>
+
+    <!-- Main Editor Area -->
+    <main id="editor-area">
+      <div id="tab-bar"></div>
+      <div id="image-preview" style="display:none;">
+        <img id="image-preview-img" src="" alt="预览图片">
+        <button id="btn-image-fit" title="缩放至适配窗口">⊞ 适配</button>
+      </div>
+      <div id="image-divider" style="display:none;"></div>
+      <div id="editor-container">
+        <div id="editor-split">
+          <div id="original-label" class="editor-label">📄 原始文件（只读）</div>
+          <div id="original-editor-container"></div>
+          <div id="editor-divider"></div>
+          <div id="preview-label" class="editor-label">✏️ 修改预览（待保存）</div>
+          <div id="preview-editor-container"></div>
+        </div>
+      </div>
+      <div id="status-bar">
+        <span id="status-tags">0 个标签</span>
+        <span id="status-modified" style="display:none;"> | 已修改</span>
+        <span id="status-hint"> | Ctrl+S 保存</span>
+        <span id="status-skipped" style="display:none;"></span>
+      </div>
+    </main>
+
+    <!-- Panel resize divider -->
+    <div id="panel-divider"></div>
+
+    <!-- Right Control Panel -->
+    <aside id="panel">
+      <h3>检查选项</h3>
+      <div id="check-options">
+        <label class="check-item" data-priority="1">
+          <input type="checkbox" id="chk-bad-tags" checked>
+          <span class="check-color" style="background:#FF922B;"></span>
+          不良标签
+        </label>
+        <label class="check-item" data-priority="2">
+          <input type="checkbox" id="chk-custom">
+          <span class="check-color" style="background:#c084fc;"></span>
+          自定义关键词
+        </label>
+        <label class="check-item" data-priority="3">
+          <input type="checkbox" id="chk-duplicate" checked>
+          <span class="check-color" style="background:#FFD43B;"></span>
+          冗余重复
+        </label>
+        <label class="check-item check-sub">
+          <input type="checkbox" id="chk-fuzzy">
+          启用模糊匹配
+        </label>
+        <label class="check-item" data-priority="4">
+          <input type="checkbox" id="chk-character" checked>
+          <span class="check-color" style="background:#FF6B6B;"></span>
+          角色特征
+        </label>
+        <label class="check-item" data-priority="5">
+          <input type="checkbox" id="chk-style" checked>
+          <span class="check-color" style="background:#51CF66;"></span>
+          风格相关
+        </label>
+      </div>
+      <button id="btn-batch-delete" title="删除当前勾选类型中所有高亮标签">🗑 一键删除选中标签</button>
+      <div id="kw-panel">
+        <div id="kw-panel-header">
+          <span>🔍 自定义关键词</span>
+        </div>
+        <div id="kw-input-row">
+          <input type="text" id="kw-input" placeholder="输入关键词，回车添加...">
+          <button id="btn-kw-add">+</button>
+        </div>
+        <div id="kw-tags"></div>
+        <div id="kw-actions">
+          <button id="btn-kw-delete-only" title="仅删除自定义关键词匹配的标签">🗑 仅删关键词</button>
+          <button id="btn-kw-manage" title="打开设置管理持久化关键词">⚙ 管理</button>
+        </div>
+      </div>
+      <hr>
+      <button id="btn-save-preview" title="将预览内容保存到本地文件">💾 保存到本地</button>
+      <hr>
+      <button id="btn-batch-delete-files" title="对勾选的所有文件执行标签删除">📋 批量删除勾选文件标签</button>
+      <button id="btn-batch-save-files" title="将勾选的所有已修改文件保存到本地">💾 批量保存勾选文件</button>
+      <hr>
+      <h3>📊 问题摘要</h3>
+      <div id="issue-summary">
+        <div class="summary-item" data-type="badTags" style="color:#FF922B;">🟠 不良: 0</div>
+        <div class="summary-item" data-type="custom" style="color:#c084fc;">🟣 自定义: 0</div>
+        <div class="summary-item" data-type="duplicate" style="color:#FFD43B;">🟡 重复: 0</div>
+        <div class="summary-item" data-type="character" style="color:#FF6B6B;">🔴 角色: 0</div>
+        <div class="summary-item" data-type="style" style="color:#51CF66;">🟢 风格: 0</div>
+      </div>
+      <hr>
+      <button id="btn-settings">⚙ 设置</button>
+      <button id="btn-export-report" style="display:none;">📄 导出报告</button>
+    </aside>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>设置</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="tab-btn active" data-tab="tab-char">角色特征词库</button>
+        <button class="tab-btn" data-tab="tab-style-kw">风格相关词库</button>
+        <button class="tab-btn" data-tab="tab-bad">不良标签词库</button>
+        <button class="tab-btn" data-tab="tab-conflict">冲突标签对</button>
+        <button class="tab-btn" data-tab="tab-custom-rules">自定义关键词</button>
+        <button class="tab-btn" data-tab="tab-io">导入/导出配置</button>
+      </div>
+      <div class="modal-body">
+        <div id="tab-char" class="tab-content active"></div>
+        <div id="tab-style-kw" class="tab-content"></div>
+        <div id="tab-bad" class="tab-content"></div>
+        <div id="tab-conflict" class="tab-content"></div>
+        <div id="tab-custom-rules" class="tab-content"></div>
+        <div id="tab-io" class="tab-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-reset-defaults">重置到默认</button>
+        <button id="btn-save-settings">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unsaved changes dialog -->
+  <div id="unsaved-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-small">
+      <p id="unsaved-message"></p>
+      <div class="modal-buttons">
+        <button id="unsaved-save">保存</button>
+        <button id="unsaved-discard">不保存</button>
+        <button id="unsaved-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "@codemirror/state": "https://esm.sh/@codemirror/state@6.5.0",
+      "@codemirror/view": "https://esm.sh/@codemirror/view@6.36.0?external=@codemirror/state",
+      "@codemirror/commands": "https://esm.sh/@codemirror/commands@6.8.0?external=@codemirror/state,@codemirror/view",
+      "@codemirror/search": "https://esm.sh/@codemirror/search@6.5.10?external=@codemirror/state,@codemirror/view",
+      "@codemirror/language": "https://esm.sh/@codemirror/language@6.11.0?external=@codemirror/state,@codemirror/view"
+    }
+  }
+  </script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
